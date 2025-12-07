@@ -21,6 +21,15 @@ class CandylandCharacter(db.Model):
             "character_name": self.character_name
         }
 
+class CandylandScore(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    score_type = db.Column(db.String(50), nullable=False) # e.g. 'morning_routine', 'maze', 'whack_a_mole'
+    score_value = db.Column(db.Integer, nullable=False)
+    
+    # Optional: Ensure a user only has one entry per game type
+    # __table_args__ = (db.UniqueConstraint('user_id', 'score_type', name='unique_user_score_type'),)
+
 # Function to initialize data if needed (keeps the pattern of the repo)
 def initCandyland():
     db.create_all()

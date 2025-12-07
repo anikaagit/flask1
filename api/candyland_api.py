@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from __init__ import db
 from model.user import User
 from model.candyland import CandylandCharacter
+from model.candyland import CandylandScore
 
 candyland_api = Blueprint('candyland_api', __name__, url_prefix='/api/candyland')
 
@@ -86,6 +87,44 @@ def save_character():
     
     db.session.commit()
     return jsonify({"message": "Character saved!"}), 200
+
+# --- SAVE SCORE ---
+@candyland_api.route('/save_score', methods=['POST'])
+@login_required 
+def save_score():
+    data = request.get_json()
+    
+    score_type = data.get('score_type')
+    score_value = data.get('score_value')
+    
+    # Validation: Ensure we actually got the data we need
+    if not score_type or score_value is None:
+        return jsonify({"error": "Missing score_type or score_value"}), 400
+
+    # Check if a score for THIS specific game type exists for this user
+    score_entry = CandylandScore.query.filter_by(
+        user_id=current_user.id, 
+        score_type=score_type
+    ).first()
+    
+    if score_entry:
+        # OPTION A: Always overwrite with the new score (most recent)
+        score_entry.score_value = score_value
+        
+        # OPTION B: Only overwrite if the new score is higher (high score system)
+        # if score_value > score_entry.score_value:
+        #     score_entry.score_value = score_value
+            
+    else:
+        new_entry = CandylandScore(
+            user_id=current_user.id,
+            score_type=score_type,
+            score_value=score_value
+        )
+        db.session.add(new_entry)
+    
+    db.session.commit()
+    return jsonify({"message": f"{score_type} score saved successfully!"}), 200
 
 # --- LOGOUT ---
 @candyland_api.route('/logout', methods=['POST'])
