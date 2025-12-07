@@ -9,10 +9,16 @@ from flask import current_app
 from werkzeug.security import generate_password_hash
 from dotenv import load_dotenv
 from api.jwt_authorize import token_required
+from api.candyland_api import candyland_api
+from model.candyland import initCandyland
+from flask_cors import CORS
+# Allow your frontend to talk to this backend
+
 
 
 # import "objects" from "this" project
 from __init__ import app, db, login_manager  # Key Flask objects 
+CORS(app, supports_credentials=True, origins=["http://localhost:4500", "http://127.0.0.1:4500"])
 # API endpoints
 from api.user import user_api 
 from api.python_exec_api import python_exec_api
@@ -62,6 +68,7 @@ app.config['KASM_API_KEY_SECRET'] = os.getenv('KASM_API_KEY_SECRET')
 
 # register URIs for api endpoints
 app.register_blueprint(python_exec_api)
+app.register_blueprint(candyland_api)
 app.register_blueprint(javascript_exec_api)
 app.register_blueprint(user_api)
 app.register_blueprint(section_api)
@@ -84,6 +91,7 @@ app.register_blueprint(post_api)  # Register the social media post API
 # Jokes file initialization
 with app.app_context():
     initJokes()
+    initCandyland()
 
 # Tell Flask-Login the view function name of your login route
 login_manager.login_view = "login"
