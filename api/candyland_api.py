@@ -126,6 +126,23 @@ def save_score():
     db.session.commit()
     return jsonify({"message": f"{score_type} score saved successfully!"}), 200
 
+# --- GET SCORES ---
+@candyland_api.route('/get_scores', methods=['GET'])
+@login_required 
+def get_scores():
+    # Fetch all scores for the current user
+    user_scores = CandylandScore.query.filter_by(user_id=current_user.id).all()
+    
+    # Convert the database objects to a JSON-friendly list
+    score_list = []
+    for entry in user_scores:
+        score_list.append({
+            "score_type": entry.score_type,
+            "score_value": entry.score_value
+        })
+    
+    return jsonify(score_list), 200
+
 # --- LOGOUT ---
 @candyland_api.route('/logout', methods=['POST'])
 @login_required
