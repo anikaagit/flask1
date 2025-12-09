@@ -9,19 +9,12 @@ joke_list = [
     "How did you feel about the speed that whack-a-candy ran at?",
     "Was the dialogue in the dialogue level engaging enough to keep your interest?",
     "Was the interactablilty of the launch party level sufficient?",
-    "Was the pasing of the game appropriate?",
+    "Was the pacing of the game appropriate?",
     "Was the UI experience good?",
     "Would you play the game again?",
     "Would you recommend the game to a friend?",
     "Did you encounter any bugs or glitches?",
-    "Did the overall design and theme of the game appeal to you?",
-    "If it wasn't for C, we’d all be programming in BASI and OBOL.",
-    "Computers make very fast, very accurate mistakes.",
-    "Q: Why is it that programmers always confuse Halloween with Christmas? A: Because 31 OCT = 25 DEC.",
-    "Q: How many programmers does it take to change a light bulb? A: None. It’s a hardware problem.",
-    "The programmer got stuck in the shower because the instructions on the shampoo bottle said: Lather, Rinse, Repeat.",
-    "Q: What is the biggest lie in the entire universe? A: I have read and agree to the Terms and Conditions.",
-    'An SQL statement walks into a bar and sees two tables. It approaches, and asks may I join you?'
+
 ]
 
 def get_jokes_file():
@@ -62,10 +55,10 @@ def initJokes():
     # prime some haha responses
     for i in range(10):
         id = random.choice(jokes_data)['id']
-        jokes_data[id]['haha'] += 1
+        jokes_data[id]['Yes!'] += 1
     for i in range(5):
         id = random.choice(jokes_data)['id']
-        jokes_data[id]['boohoo'] += 1
+        jokes_data[id]['No.'] += 1
     _write_jokes_file(jokes_data)
         
 def getJokes():
