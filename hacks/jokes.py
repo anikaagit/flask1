@@ -55,10 +55,10 @@ def initJokes():
     # prime some haha responses
     for i in range(10):
         id = random.choice(jokes_data)['id']
-        jokes_data[id]['Yes!'] += 1
+        jokes_data[id]['haha'] += 1
     for i in range(5):
         id = random.choice(jokes_data)['id']
-        jokes_data[id]['No.'] += 1
+        jokes_data[id]['boohoo'] += 1
     _write_jokes_file(jokes_data)
         
 def getJokes():
