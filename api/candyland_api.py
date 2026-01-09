@@ -157,3 +157,39 @@ def get_badge_owners():
     except Exception as e:
         print(f"Error fetching badge owners: {e}")
         return jsonify([]), 500
+    
+
+# --- APPENDED TO candyland_api.py ---
+from model.candyland import calculate_badge_rarity
+
+@candyland_api.route('/get_badges_with_rarity', methods=['GET'])
+@login_required
+def get_badges_with_rarity():
+    """
+    New endpoint that returns user badges PLUS the calculated rarity percentage.
+    """
+    user_badges = CandylandUserBadge.query.filter_by(user_id=current_user.id).all()
+    
+    results = []
+    for ub in user_badges:
+        # Call the logic from candyland.py
+        rarity_val = calculate_badge_rarity(ub.badge_id)
+        
+        results.append({
+            "id": ub.badge.id,          
+            "name": ub.badge.badge_name,
+            "icon": ub.badge.badge_icon,
+            "rarity": rarity_val,
+            "rarity_text": f"Only {rarity_val}% have earned this"
+        })
+        
+    return jsonify(results), 200
+
+@candyland_api.route('/admin/inject_data', methods=['POST'])
+def admin_inject():
+    """
+    Manual trigger for your professor to see data injection.
+    """
+    from model.candyland import inject_mock_data
+    inject_mock_data(50)
+    return jsonify({"message": "Injected 50 mock users"}), 200
