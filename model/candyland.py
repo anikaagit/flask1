@@ -65,18 +65,30 @@ def initCandyland():
 import random
 from sqlalchemy import func
 
+# Update this function in candyland.py
 def calculate_badge_rarity(badge_id):
     """
-    Business Logic: Calculates percentage of users who own a specific badge.
+    Refined Business Logic: Calculates rarity based on 
+    Attempts (JinjaAdmin) vs Earned (UserBadge).
     """
-    total_users = db.session.query(func.count(User.id)).scalar()
-    if total_users == 0:
+    badge = CandylandBadge.query.get(badge_id)
+    if not badge:
         return 0
+
+    # 1. Get total attempts from the "Administration Table" (JinjaAdmin)
+    stats = CandylandJinjaAdmin.query.filter_by(game_id=badge.badge_name).first()
+    total_attempts = stats.total_global_attempts if stats else 0
     
-    # Count how many users have this specific badge_id in the M2M table
-    users_with_badge = db.session.query(func.count(CandylandUserBadge.user_id)).filter_by(badge_id=badge_id).scalar()
+    # 2. Get total people who actually won it (Many-to-Many table)
+    total_earned = db.session.query(func.count(CandylandUserBadge.user_id)).filter_by(badge_id=badge_id).scalar()
+
+    if total_attempts == 0:
+        # Fallback: if no Jinja stats exist yet, use total users so we don't divide by zero
+        total_users = db.session.query(func.count(User.id)).scalar()
+        if total_users == 0: return 0
+        return round((total_earned / total_users) * 100, 1)
     
-    rarity_percentage = (users_with_badge / total_users) * 100
+    rarity_percentage = (total_earned / total_attempts) * 100
     return round(rarity_percentage, 1)
 
 def inject_mock_data(count=50):
@@ -141,3 +153,25 @@ def setup_candyland_with_data():
     # Only inject if we don't have enough data already
     if db.session.query(func.count(User.id)).scalar() < 20:
         inject_mock_data(100)
+
+# --- NEW: JINJA ADMINISTRATION TABLE (Phase 1) ---
+class CandylandJinjaAdmin(db.Model):
+    """
+    This is the core Administration Table requested by the professor.
+    It tracks global game analytics (Attempts) used to calculate rarity.
+    """
+    __tablename__ = 'candyland_jinja_admin'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    game_id = db.Column(db.String(100), unique=True, nullable=False) # e.g., 'Path Finder'
+    total_global_attempts = db.Column(db.Integer, default=0)
+
+    def __init__(self, game_id, total_global_attempts=0):
+        self.game_id = game_id
+        self.total_global_attempts = total_global_attempts
+
+    def to_dict(self):
+        return {
+            "game_id": self.game_id,
+            "attempts": self.total_global_attempts
+        }

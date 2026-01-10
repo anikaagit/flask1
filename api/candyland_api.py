@@ -193,3 +193,35 @@ def admin_inject():
     from model.candyland import inject_mock_data
     inject_mock_data(50)
     return jsonify({"message": "Injected 50 mock users"}), 200
+
+# --- JINJA ADMINISTRATION ROUTES (Phase 1) ---
+from model.candyland import CandylandJinjaAdmin
+
+@candyland_api.route('/increment_attempts', methods=['POST'])
+def increment_attempts():
+    """
+    Increments the global attempt counter in the Jinja Admin table.
+    This provides the denominator for the new rarity calculation.
+    """
+    data = request.get_json()
+    game_id = data.get('game_id') # e.g., 'Path Finder'
+
+    if not game_id:
+        return jsonify({"error": "game_id required"}), 400
+
+    # Look for the record in our Admin table
+    stats = CandylandJinjaAdmin.query.filter_by(game_id=game_id).first()
+
+    if stats:
+        stats.total_global_attempts += 1
+    else:
+        # Create a new record if this is the first time the game is played
+        stats = CandylandJinjaAdmin(game_id=game_id, total_global_attempts=1)
+        db.session.add(stats)
+
+    db.session.commit()
+    
+    return jsonify({
+        "message": f"Attempt logged for {game_id}", 
+        "total": stats.total_global_attempts
+    }), 200
