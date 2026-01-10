@@ -225,3 +225,12 @@ def increment_attempts():
         "message": f"Attempt logged for {game_id}", 
         "total": stats.total_global_attempts
     }), 200
+
+@candyland_api.route('/admin/clear_data', methods=['POST'])
+def admin_clear():
+    """
+    Clear mock data to fix rarity math errors like '1400%'
+    """
+    from model.candyland import clear_candyland_data
+    clear_candyland_data()
+    return jsonify({"message": "Database cleaned. Rarity reset to 0."}), 200

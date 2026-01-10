@@ -93,10 +93,9 @@ def calculate_badge_rarity(badge_id):
 
 def inject_mock_data(count=50):
     """
-    Generates mock users and assigns badges with varying probabilities 
-    to simulate different rarity levels.
+    FIXED: Now increments JinjaAdmin attempts along with assigning badges
+    to ensure rarity math stays below 100%.
     """
-    # 1. Define the Master Badge List and Icons
     badge_data = [
         ('Path Finder', '📍'), ('Speed Runner', '⚡'), ('Perfect Navigator', '🧭'),
         ('Bug Master', '🐛'), ('Quick Reflexes', '🤺'), ('Good Shot', '🎯'),
@@ -107,7 +106,7 @@ def inject_mock_data(count=50):
         ('Still Sleepy', '😴'), ('Careful Observer', '🧐')
     ]
 
-    # 2. Ensure all badges exist in the DB
+    # Ensure badges and Admin records exist
     badge_objs = []
     for name, icon in badge_data:
         b = CandylandBadge.query.filter_by(badge_name=name).first()
@@ -115,35 +114,57 @@ def inject_mock_data(count=50):
             b = CandylandBadge(badge_name=name, badge_icon=icon)
             db.session.add(b)
         badge_objs.append(b)
+        
+        # Ensure there is a record in JinjaAdmin for this badge
+        admin_rec = CandylandJinjaAdmin.query.filter_by(game_id=name).first()
+        if not admin_rec:
+            admin_rec = CandylandJinjaAdmin(game_id=name, total_global_attempts=0)
+            db.session.add(admin_rec)
     db.session.commit()
 
-    # 3. Create Mock Users and assign badges
-    # We use a loop to create "A lot of test data" as requested
     for i in range(count):
         fake_uid = f"mock_user_{random.randint(1000, 9999)}_{i}"
         if not User.query.filter_by(_uid=fake_uid).first():
             user = User(name=fake_uid, uid=fake_uid, password="password123")
             db.session.add(user)
-            db.session.flush() # Gets the ID without committing yet
+            db.session.flush() 
 
-            # Assign badges based on different probabilities to create 'Rarity'
             for b in badge_objs:
-                # Some badges are very rare (3%), some are common (70%)
-                if b.badge_name in ['Bug Master', 'Perfect Scholar']:
-                    prob = 0.03 # 3% Rarity
+                # IMPORTANT: Every mock user represents an "Attempt" 
+                admin_rec = CandylandJinjaAdmin.query.filter_by(game_id=b.badge_name).first()
+                admin_rec.total_global_attempts += 1
+
+                # Probabilities for "Earned"
+                if b.badge_name in ['Bug Master', 'Perfect Scholar', 'Perfect Morning']:
+                    prob = 0.03 # 3% Rare
                 elif b.badge_name in ['Path Finder', 'Still Sleepy']:
-                    prob = 0.70 # 70% Rarity
+                    prob = 0.70 # 70% Common
                 else:
-                    prob = 0.15 # 15% Rarity
+                    prob = 0.15 # 15% Uncommon
                 
                 if random.random() < prob:
-                    # Assign badge to user
                     rel = CandylandUserBadge(user_id=user.id, badge_id=b.id)
                     db.session.add(rel)
     
     db.session.commit()
-    print(f"Successfully injected {count} mock users and distributed badges.")
+    print(f"Injected {count} users. Denominators (JinjaAdmin) and Numerators (UserBadge) are synced.")
 
+def clear_candyland_data():
+    """
+    Cleans up mock users and resets admin stats so you can fix the 1400% error.
+    """
+    # Delete mock users (names starting with mock_user_)
+    mock_users = User.query.filter(User._uid.like('mock_user_%')).all()
+    for u in mock_users:
+        # Relationships (badges/scores) will cascade delete if your model is set up correctly
+        db.session.delete(u)
+    
+    # Reset JinjaAdmin attempts to 0
+    db.session.query(CandylandJinjaAdmin).update({CandylandJinjaAdmin.total_global_attempts: 0})
+    
+    db.session.commit()
+    print("Mock data cleared and JinjaAdmin reset.")
+    
 def setup_candyland_with_data():
     """
     Replacement for initCandyland to ensure tables are created 
