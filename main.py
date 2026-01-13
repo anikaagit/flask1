@@ -11,6 +11,8 @@ from dotenv import load_dotenv
 from api.jwt_authorize import token_required
 from api.candyland_api import candyland_api
 from model.candyland import initCandyland
+from api.npc_api import npc_api
+from model.npc import initNpc
 from flask_cors import CORS
 # Allow your frontend to talk to this backend
 
@@ -72,6 +74,7 @@ app.config['FLASK_PORT'] = 8305
 # register URIs for api endpoints
 app.register_blueprint(python_exec_api)
 app.register_blueprint(candyland_api)
+app.register_blueprint(npc_api)
 app.register_blueprint(javascript_exec_api)
 app.register_blueprint(user_api)
 app.register_blueprint(section_api)
@@ -95,6 +98,7 @@ app.register_blueprint(post_api)  # Register the social media post API
 with app.app_context():
     initJokes()
     initCandyland()
+    initNpc()
 
 # Tell Flask-Login the view function name of your login route
 login_manager.login_view = "login"
