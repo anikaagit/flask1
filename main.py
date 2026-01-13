@@ -12,7 +12,9 @@ from api.jwt_authorize import token_required
 from api.candyland_api import candyland_api
 from model.candyland import initCandyland
 from api.npc_api import npc_api
-from model.npc import initNpc
+from api.game_api import game_api
+from api.quiz_api import quiz_api
+from model.npc import initGasGame
 from flask_cors import CORS
 # Allow your frontend to talk to this backend
 
@@ -75,6 +77,8 @@ app.config['FLASK_PORT'] = 8305
 app.register_blueprint(python_exec_api)
 app.register_blueprint(candyland_api)
 app.register_blueprint(npc_api)
+app.register_blueprint(game_api)
+app.register_blueprint(quiz_api)
 app.register_blueprint(javascript_exec_api)
 app.register_blueprint(user_api)
 app.register_blueprint(section_api)
@@ -98,7 +102,7 @@ app.register_blueprint(post_api)  # Register the social media post API
 with app.app_context():
     initJokes()
     initCandyland()
-    initNpc()
+    initGasGame()
 
 # Tell Flask-Login the view function name of your login route
 login_manager.login_view = "login"

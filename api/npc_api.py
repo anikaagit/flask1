@@ -2,7 +2,10 @@ from flask import Blueprint, request, jsonify
 from sqlalchemy import func
 
 from __init__ import db
-from model.npc import Npc, QuestionPool, NpcInteraction
+from model.npc import Npc
+from model.game_session import GameSession
+from model.question import Question
+from model.player_interaction import PlayerInteraction
 
 
 npc_api = Blueprint('npc_api', __name__, url_prefix='/api/npc')
@@ -27,21 +30,38 @@ def interact():
     if not npc:
         return jsonify({"error": "NPC not found", "npc_id": npc_id}), 404
 
-    # Choose question only if this NPC is a gas holder.
-    if npc.is_gas_holder:
-        # Prefer NPC-specific questions; fall back to global ones.
+    session = GameSession.query.get(session_id)
+    if not session:
+        return jsonify({"error": "Session not found", "session_id": session_id}), 404
+
+    if session.is_completed:
+        return jsonify({"error": "Session already completed", "session_id": session_id}), 409
+
+    is_gas_holder = session.gas_holder_npc_id == npc.id
+
+    # Choose question only if this NPC is the gas holder for this session.
+    if is_gas_holder:
+        used_question_ids_subq = (
+            db.session.query(PlayerInteraction.question_id)
+            .filter(
+                PlayerInteraction.session_id == session_id,
+                PlayerInteraction.question_id.isnot(None),
+            )
+            .subquery()
+        )
+
         question = (
-            QuestionPool.query
-            .filter((QuestionPool.npc_id == npc.id) | (QuestionPool.npc_id.is_(None)))
+            Question.query
+            .filter(Question.correct_answer.isnot(None))
+            .filter(Question.options.isnot(None))
+            .filter(~Question.id.in_(used_question_ids_subq))
             .order_by(func.random())
             .first()
         )
 
-        interaction = NpcInteraction(
+        interaction = PlayerInteraction(
             session_id=session_id,
             npc_id=npc.id,
-            was_gas_holder=True,
-            interaction_type='question',
             question_id=question.id if question else None,
         )
         try:
@@ -53,16 +73,14 @@ def interact():
 
         return jsonify({
             "result": "question",
-            "npc": npc.to_dict(),
-            "question": question.to_dict() if question else None,
+            "npc": {**npc.to_public_dict(), "is_gas_holder": True},
+            "question": question.to_public_dict() if question else None,
             "message": None if question else "No questions available",
         }), 200
 
-    interaction = NpcInteraction(
+    interaction = PlayerInteraction(
         session_id=session_id,
         npc_id=npc.id,
-        was_gas_holder=False,
-        interaction_type='success',
         question_id=None,
     )
     try:
@@ -74,6 +92,6 @@ def interact():
 
     return jsonify({
         "result": "success",
-        "npc": npc.to_dict(),
+        "npc": {**npc.to_public_dict(), "is_gas_holder": False},
         "message": "NPC interaction successful",
     }), 200

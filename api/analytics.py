@@ -3,9 +3,16 @@ from flask_restful import Api, Resource
 from flask_login import current_user, login_required
 from datetime import datetime
 from api.jwt_authorize import token_required
+from __init__ import db
 from model.github import GitHubUser, GitHubOrg
 from model.user import User
 import time
+
+# Gas-game analytics (Phase 4)
+from sqlalchemy import func, case
+from model.game_session import GameSession
+from model.player_interaction import PlayerInteraction
+from model.question import Question
 
 
 
@@ -40,6 +47,174 @@ def get_date_range(body):
         end_date = end_date.strftime('%Y-%m-%d')
 
     return start_date, end_date
+
+
+@analytics_api.route('/player/<int:user_id>', methods=['GET'])
+def gasgame_player_analytics(user_id: int):
+    """Phase 4: Player performance history for the gas-game."""
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found", "user_id": user_id}), 404
+
+    limit = request.args.get('limit', default=25, type=int)
+    limit = max(1, min(limit, 200))
+
+    sessions = (
+        GameSession.query
+        .filter(GameSession.user_id == user_id)
+        .order_by(GameSession.start_time.desc())
+        .limit(limit)
+        .all()
+    )
+
+    session_ids = [s.session_id for s in sessions]
+
+    # Aggregate interaction stats by session
+    interaction_rows = []
+    if session_ids:
+        interaction_rows = (
+            db.session.query(
+                PlayerInteraction.session_id.label('session_id'),
+                func.count(PlayerInteraction.id).label('interaction_count'),
+                func.sum(case((PlayerInteraction.question_id.isnot(None), 1), else_=0)).label('questions_seen'),
+                func.sum(case((PlayerInteraction.is_correct.is_(True), 1), else_=0)).label('correct_count'),
+                func.avg(PlayerInteraction.response_time_ms).label('avg_response_time_ms'),
+            )
+            .filter(PlayerInteraction.session_id.in_(session_ids))
+            .group_by(PlayerInteraction.session_id)
+            .all()
+        )
+
+    by_session = {r.session_id: r for r in interaction_rows}
+
+    # Compute top-level aggregates
+    total_sessions = len(sessions)
+    completed_sessions = sum(1 for s in sessions if s.is_completed)
+
+    durations_s = []
+    for s in sessions:
+        if s.is_completed and s.start_time and s.end_time:
+            durations_s.append((s.end_time - s.start_time).total_seconds())
+
+    avg_completion_time_s = round(sum(durations_s) / len(durations_s), 2) if durations_s else None
+    avg_attempts = round(sum(s.attempts_count for s in sessions) / total_sessions, 2) if total_sessions else 0
+
+    recent_sessions = []
+    for s in sessions:
+        row = by_session.get(s.session_id)
+        duration = None
+        if s.is_completed and s.start_time and s.end_time:
+            duration = round((s.end_time - s.start_time).total_seconds(), 2)
+
+        recent_sessions.append({
+            "session_id": s.session_id,
+            "start_time": s.start_time.isoformat() if s.start_time else None,
+            "end_time": s.end_time.isoformat() if s.end_time else None,
+            "is_completed": s.is_completed,
+            "attempts_count": s.attempts_count,
+            "duration_s": duration,
+            "questions_seen": int(row.questions_seen) if row and row.questions_seen is not None else 0,
+            "correct_count": int(row.correct_count) if row and row.correct_count is not None else 0,
+            "avg_response_time_ms": round(float(row.avg_response_time_ms), 2) if row and row.avg_response_time_ms is not None else None,
+        })
+
+    return jsonify({
+        "user": {"id": user.id, "uid": user.uid, "name": user.name},
+        "summary": {
+            "total_sessions": total_sessions,
+            "completed_sessions": completed_sessions,
+            "completion_rate": round(completed_sessions / total_sessions, 4) if total_sessions else 0,
+            "avg_completion_time_s": avg_completion_time_s,
+            "avg_attempts": avg_attempts,
+        },
+        "recent_sessions": recent_sessions,
+    }), 200
+
+
+@analytics_api.route('/questions', methods=['GET'])
+def gasgame_question_analytics():
+    """Phase 4: Question difficulty and success rates."""
+    limit = request.args.get('limit', default=50, type=int)
+    limit = max(1, min(limit, 500))
+    category = request.args.get('category', default=None, type=str)
+    difficulty = request.args.get('difficulty_level', default=None, type=int)
+
+    base = (
+        db.session.query(
+            Question.id.label('question_id'),
+            Question.question_text.label('question_text'),
+            Question.difficulty_level.label('difficulty_level'),
+            Question.category.label('category'),
+            Question.college_board_aligned.label('college_board_aligned'),
+            func.count(PlayerInteraction.id).label('attempt_count'),
+            func.sum(case((PlayerInteraction.is_correct.is_(True), 1), else_=0)).label('correct_count'),
+            func.avg(PlayerInteraction.response_time_ms).label('avg_response_time_ms'),
+        )
+        .outerjoin(PlayerInteraction, PlayerInteraction.question_id == Question.id)
+        .group_by(Question.id)
+    )
+
+    if category:
+        base = base.filter(Question.category == category)
+    if difficulty is not None:
+        base = base.filter(Question.difficulty_level == difficulty)
+
+    rows = base.order_by(func.count(PlayerInteraction.id).desc(), Question.id.asc()).limit(limit).all()
+
+    results = []
+    for r in rows:
+        attempt_count = int(r.attempt_count or 0)
+        correct_count = int(r.correct_count or 0)
+        results.append({
+            "question_id": r.question_id,
+            "question_text": r.question_text,
+            "difficulty_level": r.difficulty_level,
+            "category": r.category,
+            "college_board_aligned": bool(r.college_board_aligned),
+            "attempt_count": attempt_count,
+            "correct_count": correct_count,
+            "correct_rate": round(correct_count / attempt_count, 4) if attempt_count else None,
+            "avg_response_time_ms": round(float(r.avg_response_time_ms), 2) if r.avg_response_time_ms is not None else None,
+        })
+
+    return jsonify({
+        "count": len(results),
+        "results": results,
+    }), 200
+
+
+@analytics_api.route('/sessions', methods=['GET'])
+def gasgame_session_analytics():
+    """Phase 4: Session analytics (completion time, retry rates)."""
+    limit = request.args.get('limit', default=500, type=int)
+    limit = max(1, min(limit, 5000))
+
+    sessions = (
+        GameSession.query
+        .order_by(GameSession.start_time.desc())
+        .limit(limit)
+        .all()
+    )
+
+    total_sessions = len(sessions)
+    completed = [s for s in sessions if s.is_completed and s.start_time and s.end_time]
+    completed_sessions = len(completed)
+
+    durations = [(s.end_time - s.start_time).total_seconds() for s in completed]
+    avg_completion_time_s = round(sum(durations) / len(durations), 2) if durations else None
+
+    retry_sessions = sum(1 for s in sessions if (s.attempts_count or 0) > 0)
+
+    return jsonify({
+        "summary": {
+            "total_sessions": total_sessions,
+            "completed_sessions": completed_sessions,
+            "completion_rate": round(completed_sessions / total_sessions, 4) if total_sessions else 0,
+            "avg_completion_time_s": avg_completion_time_s,
+            "avg_attempts": round(sum((s.attempts_count or 0) for s in sessions) / total_sessions, 2) if total_sessions else 0,
+            "retry_rate": round(retry_sessions / total_sessions, 4) if total_sessions else 0,
+        }
+    }), 200
 
 
 

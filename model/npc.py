@@ -1,89 +1,130 @@
 from __init__ import db
-from datetime import datetime
+from sqlalchemy import text
 
 
 class Npc(db.Model):
     __tablename__ = 'npcs'
 
+    # NOTE: existing deployments already have `id` as the primary key column.
+    # We keep `id` for compatibility and expose it to clients as `npc_id`.
     id = db.Column(db.Integer, primary_key=True)
+
     name = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    dialogue_text = db.Column(db.Text, nullable=True)
+
+    # Gas holder is assigned per-session; this field is kept for compatibility.
     is_gas_holder = db.Column(db.Boolean, nullable=False, default=False)
 
-    def __init__(self, name: str, is_gas_holder: bool = False):
+    def __init__(
+        self,
+        name: str,
+        description: str | None = None,
+        dialogue_text: str | None = None,
+        is_gas_holder: bool = False,
+    ):
         self.name = name
+        self.description = description
+        self.dialogue_text = dialogue_text
         self.is_gas_holder = is_gas_holder
+
+    def to_public_dict(self):
+        # IMPORTANT: do not reveal gas holder assignment in game/start
+        return {
+            "npc_id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "dialogue_text": self.dialogue_text,
+        }
 
     def to_dict(self):
         return {
-            "id": self.id,
-            "name": self.name,
+            **self.to_public_dict(),
             "is_gas_holder": self.is_gas_holder,
         }
 
 
-class QuestionPool(db.Model):
-    __tablename__ = 'question_pool'
-
-    id = db.Column(db.Integer, primary_key=True)
-    npc_id = db.Column(db.Integer, db.ForeignKey('npcs.id'), nullable=True)
-    question_text = db.Column(db.Text, nullable=False)
-
-    npc = db.relationship('Npc', backref=db.backref('questions', cascade='all, delete-orphan'))
-
-    def __init__(self, question_text: str, npc_id: int | None = None):
-        self.question_text = question_text
-        self.npc_id = npc_id
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "npc_id": self.npc_id,
-            "question_text": self.question_text,
-        }
-
-
-class NpcInteraction(db.Model):
-    __tablename__ = 'npc_interactions'
-
-    id = db.Column(db.Integer, primary_key=True)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-
-    session_id = db.Column(db.String(128), nullable=False, index=True)
-    npc_id = db.Column(db.Integer, db.ForeignKey('npcs.id'), nullable=False, index=True)
-    was_gas_holder = db.Column(db.Boolean, nullable=False, default=False)
-
-    # What happened in this interaction
-    interaction_type = db.Column(db.String(32), nullable=False)  # 'question' | 'success'
-    question_id = db.Column(db.Integer, db.ForeignKey('question_pool.id'), nullable=True)
-
-    npc = db.relationship('Npc', backref=db.backref('interactions', cascade='all, delete-orphan'))
-    question = db.relationship('QuestionPool')
-
-    def __init__(
-        self,
-        session_id: str,
-        npc_id: int,
-        was_gas_holder: bool,
-        interaction_type: str,
-        question_id: int | None = None,
-    ):
-        self.session_id = session_id
-        self.npc_id = npc_id
-        self.was_gas_holder = was_gas_holder
-        self.interaction_type = interaction_type
-        self.question_id = question_id
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "session_id": self.session_id,
-            "npc_id": self.npc_id,
-            "was_gas_holder": self.was_gas_holder,
-            "interaction_type": self.interaction_type,
-            "question_id": self.question_id,
-        }
-
-
-def initNpc():
+def initGasGame():
     db.create_all()
+
+    # Lightweight, best-effort schema upgrades for SQLite (no Alembic migrations in this repo).
+    # This keeps existing DBs (which may already have npcs/question_pool) compatible.
+    try:
+        if db.engine.dialect.name == 'sqlite':
+            npc_cols = {row[1] for row in db.session.execute(text('PRAGMA table_info(npcs)')).fetchall()}
+            if 'description' not in npc_cols:
+                db.session.execute(text('ALTER TABLE npcs ADD COLUMN description TEXT'))
+            if 'dialogue_text' not in npc_cols:
+                db.session.execute(text('ALTER TABLE npcs ADD COLUMN dialogue_text TEXT'))
+
+            q_cols = {row[1] for row in db.session.execute(text('PRAGMA table_info(question_pool)')).fetchall()}
+            if 'difficulty_level' not in q_cols:
+                db.session.execute(text('ALTER TABLE question_pool ADD COLUMN difficulty_level INTEGER'))
+            if 'correct_answer' not in q_cols:
+                db.session.execute(text('ALTER TABLE question_pool ADD COLUMN correct_answer VARCHAR(255)'))
+            if 'options' not in q_cols:
+                db.session.execute(text('ALTER TABLE question_pool ADD COLUMN options JSON'))
+            if 'category' not in q_cols:
+                db.session.execute(text('ALTER TABLE question_pool ADD COLUMN category VARCHAR(120)'))
+            if 'college_board_aligned' not in q_cols:
+                db.session.execute(text('ALTER TABLE question_pool ADD COLUMN college_board_aligned BOOLEAN DEFAULT 0'))
+
+            # Indexes for common analytics lookups
+            db.session.execute(text('CREATE INDEX IF NOT EXISTS idx_game_sessions_user_id ON game_sessions (user_id)'))
+            db.session.execute(text('CREATE INDEX IF NOT EXISTS idx_game_sessions_start_time ON game_sessions (start_time)'))
+            db.session.execute(text('CREATE INDEX IF NOT EXISTS idx_player_interactions_session_id ON player_interactions (session_id)'))
+            db.session.execute(text('CREATE INDEX IF NOT EXISTS idx_player_interactions_question_id ON player_interactions (question_id)'))
+            db.session.execute(text('CREATE INDEX IF NOT EXISTS idx_player_interactions_timestamp ON player_interactions (timestamp)'))
+
+            db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+    # Lightweight seed so the game can run locally without extra scripts.
+    # Only seeds if there are no NPCs or questions.
+    try:
+        from model.question import Question
+
+        if not Npc.query.first():
+            db.session.add_all([
+                Npc(name='Gas Station Attendant', description='Works the counter.', dialogue_text='Need some fuel?'),
+                Npc(name='Road Tripper', description='Traveling across town.', dialogue_text='I just need directions.'),
+                Npc(name='Mechanic', description='Fixes cars for a living.', dialogue_text='Sounds like an engine issue.'),
+            ])
+            db.session.commit()
+
+        valid_question_exists = (
+            Question.query
+            .filter(Question.correct_answer.isnot(None))
+            .filter(Question.options.isnot(None))
+            .first()
+            is not None
+        )
+
+        if not valid_question_exists:
+            db.session.add_all([
+                Question(
+                    question_text='Which of these best describes an algorithm?',
+                    correct_answer='A step-by-step procedure to solve a problem',
+                    options=[
+                        'A programming language',
+                        'A step-by-step procedure to solve a problem',
+                        'A computer hardware component',
+                        'A type of network protocol'
+                    ],
+                    difficulty_level=1,
+                    category='APCSP',
+                    college_board_aligned=True,
+                ),
+                Question(
+                    question_text='What does a boolean variable represent?',
+                    correct_answer='True/False',
+                    options=['0-9', 'A sentence', 'True/False', 'A picture'],
+                    difficulty_level=1,
+                    category='APCSP',
+                    college_board_aligned=True,
+                ),
+            ])
+            db.session.commit()
+    except Exception:
+        db.session.rollback()
