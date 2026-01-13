@@ -64,6 +64,9 @@ app.config['KASM_SERVER'] = os.getenv('KASM_SERVER')
 app.config['KASM_API_KEY'] = os.getenv('KASM_API_KEY')
 app.config['KASM_API_KEY_SECRET'] = os.getenv('KASM_API_KEY_SECRET')
 
+# Set the default port for the Flask application
+app.config['FLASK_PORT'] = 8305
+
 
 
 # register URIs for api endpoints
