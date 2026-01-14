@@ -31,12 +31,16 @@ cors = CORS(
    app,
    supports_credentials=True,
    origins=[
-       'http://localhost:4500',
-       'http://127.0.0.1:4500',
-       'http://localhost:4600',
-       'http://127.0.0.1:4600',
-       'http://localhost:4000',
-       'http://127.0.0.1:4000',
+      # Dev: allow any localhost port (Live Server, Vite, etc.)
+      r'http://localhost(:\d+)?',
+      r'http://127\.0\.0\.1(:\d+)?',
+      # Common explicit dev ports
+      'http://localhost:4500',
+      'http://127.0.0.1:4500',
+      'http://localhost:4600',
+      'http://127.0.0.1:4600',
+      'http://localhost:4000',
+      'http://127.0.0.1:4000',
        'https://open-coding-society.github.io',
        'https://pages.opencodingsociety.com',
    ],

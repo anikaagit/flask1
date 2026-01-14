@@ -22,7 +22,7 @@ from flask_cors import CORS
 
 # import "objects" from "this" project
 from __init__ import app, db, login_manager  # Key Flask objects 
-CORS(app, supports_credentials=True, origins=["http://localhost:4500", "http://127.0.0.1:4500"])
+# CORS is configured centrally in __init__.py
 # API endpoints
 from api.user import user_api 
 from api.python_exec_api import python_exec_api
@@ -36,6 +36,7 @@ from api.groq_api import groq_api
 from api.gemini_api import gemini_api
 from api.microblog_api import microblog_api
 from api.classroom_api import classroom_api
+from api.health_api import health_api
 from hacks.joke import joke_api  # Import the joke API blueprint
 from api.post import post_api  # Import the social media post API
 #from api.announcement import announcement_api ##temporary revert
@@ -68,8 +69,8 @@ app.config['KASM_SERVER'] = os.getenv('KASM_SERVER')
 app.config['KASM_API_KEY'] = os.getenv('KASM_API_KEY')
 app.config['KASM_API_KEY_SECRET'] = os.getenv('KASM_API_KEY_SECRET')
 
-# Set the default port for the Flask application
-app.config['FLASK_PORT'] = 8305
+# NOTE: Do not override FLASK_PORT here.
+# Port is configured in __init__.py (defaults to 8587) and can be overridden via env var FLASK_PORT.
 
 
 
@@ -87,6 +88,8 @@ app.register_blueprint(stock_api)
 app.register_blueprint(groq_api)
 app.register_blueprint(gemini_api)
 app.register_blueprint(microblog_api)
+
+app.register_blueprint(health_api)
 
 app.register_blueprint(analytics_api)
 app.register_blueprint(student_api)

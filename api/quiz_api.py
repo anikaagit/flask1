@@ -55,8 +55,15 @@ def answer():
     if _is_session_expired(session):
         return jsonify({"error": "Session expired", "session_id": session_id}), 403
 
+    # Frontends often treat non-2xx as a network failure. Return 200 with a
+    # clear message so UI can prompt the user to start a new round.
     if session.is_completed:
-        return jsonify({"error": "Session already completed", "session_id": session_id}), 409
+        return jsonify({
+            "is_correct": False,
+            "session_completed": True,
+            "attempts_count": session.attempts_count,
+            "message": "Session already completed. Start a new round.",
+        }), 200
 
     question = Question.query.get(question_id)
     if not question:
@@ -72,7 +79,10 @@ def answer():
     if not interaction:
         return jsonify({"error": "No interaction found for this question in session"}), 400
 
-    is_correct = _normalize(user_answer) == _normalize(question.correct_answer)
+    answer_matches = _normalize(user_answer) == _normalize(question.correct_answer)
+    # Only a correct answer given to the gas-holder NPC should complete the session.
+    answered_gas_holder = interaction.npc_id == session.gas_holder_npc_id
+    is_correct = bool(answer_matches and answered_gas_holder)
 
     try:
         interaction.user_answer = str(user_answer)
@@ -94,5 +104,9 @@ def answer():
         "is_correct": is_correct,
         "session_completed": session.is_completed,
         "attempts_count": session.attempts_count,
-        "message": "Correct! You found the gas holder." if is_correct else "Incorrect. Try again.",
+        "message": (
+            "Correct! You found the gas holder."
+            if is_correct
+            else ("Correct answer, but wrong NPC. Keep looking." if answer_matches and not answered_gas_holder else "Incorrect. Try again.")
+        ),
     }), 200

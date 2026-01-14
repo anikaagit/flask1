@@ -81,16 +81,35 @@ def initGasGame():
         db.session.rollback()
 
     # Lightweight seed so the game can run locally without extra scripts.
-    # Only seeds if there are no NPCs or questions.
+    # Ensure there are enough NPCs/questions for the minigame.
     try:
         from model.question import Question
 
-        if not Npc.query.first():
-            db.session.add_all([
-                Npc(name='Gas Station Attendant', description='Works the counter.', dialogue_text='Need some fuel?'),
-                Npc(name='Road Tripper', description='Traveling across town.', dialogue_text='I just need directions.'),
-                Npc(name='Mechanic', description='Fixes cars for a living.', dialogue_text='Sounds like an engine issue.'),
-            ])
+        # Seed/extend NPCs up to 5 minimum (the Gas Hunt frontend expects 5).
+        existing_npcs = Npc.query.order_by(Npc.id.asc()).all()
+        existing_names = {n.name for n in existing_npcs}
+
+        npc_candidates = [
+            Npc(name='Test Gas Holder', description='Debug NPC.', dialogue_text='Ask me a question.'),
+            Npc(name='Test Friendly NPC', description='Debug NPC.', dialogue_text='Hello there!'),
+            Npc(name='Gas Station Attendant', description='Works the counter.', dialogue_text='Need some fuel?'),
+            Npc(name='Road Tripper', description='Traveling across town.', dialogue_text='I just need directions.'),
+            Npc(name='Mechanic', description='Fixes cars for a living.', dialogue_text='Sounds like an engine issue.'),
+            Npc(name='Delivery Driver', description='In a hurry.', dialogue_text='Running late on my route.'),
+            Npc(name='Tourist', description='New in town.', dialogue_text='Where is the nearest landmark?'),
+        ]
+
+        to_add = []
+        for candidate in npc_candidates:
+            if len(existing_npcs) + len(to_add) >= 5:
+                break
+            if candidate.name in existing_names:
+                continue
+            to_add.append(candidate)
+            existing_names.add(candidate.name)
+
+        if to_add:
+            db.session.add_all(to_add)
             db.session.commit()
 
         valid_question_exists = (

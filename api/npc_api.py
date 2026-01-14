@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from sqlalchemy import func
+from sqlalchemy import func, select
 
 from __init__ import db
 from model.npc import Npc
@@ -39,49 +39,64 @@ def interact():
 
     is_gas_holder = session.gas_holder_npc_id == npc.id
 
-    # Choose question only if this NPC is the gas holder for this session.
-    if is_gas_holder:
-        used_question_ids_subq = (
-            db.session.query(PlayerInteraction.question_id)
-            .filter(
-                PlayerInteraction.session_id == session_id,
-                PlayerInteraction.question_id.isnot(None),
-            )
-            .subquery()
+    # This minigame expects a question for every NPC interaction.
+    # We return a question for both gas-holder and non-gas-holder NPCs.
+    # Correctness is validated in /api/quiz/answer by checking whether the
+    # interaction's npc_id matches the session's gas-holder npc.
+    used_question_ids_select = (
+        select(PlayerInteraction.question_id)
+        .where(
+            PlayerInteraction.session_id == session_id,
+            PlayerInteraction.question_id.isnot(None),
         )
+    )
 
-        question = (
+    question = (
+        Question.query
+        .filter(Question.correct_answer.isnot(None))
+        .filter(Question.options.isnot(None))
+        .filter(~Question.id.in_(used_question_ids_select))
+        .order_by(func.random())
+        .first()
+    )
+
+    # If the session has exhausted the question pool, clone a random valid question
+    # to guarantee a unique question_id for this interaction.
+    if question is None:
+        template_question = (
             Question.query
             .filter(Question.correct_answer.isnot(None))
             .filter(Question.options.isnot(None))
-            .filter(~Question.id.in_(used_question_ids_subq))
             .order_by(func.random())
             .first()
         )
 
-        interaction = PlayerInteraction(
-            session_id=session_id,
-            npc_id=npc.id,
-            question_id=question.id if question else None,
-        )
-        try:
-            db.session.add(interaction)
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
-            raise
+        if template_question is not None:
+            question = Question(
+                question_text=template_question.question_text,
+                correct_answer=template_question.correct_answer,
+                options=list(template_question.options) if isinstance(template_question.options, list) else template_question.options,
+                difficulty_level=template_question.difficulty_level,
+                category=template_question.category,
+                college_board_aligned=template_question.college_board_aligned,
+            )
+        else:
+            question = Question(
+                question_text='What is 2 + 2?',
+                correct_answer='4',
+                options=['3', '4', '5', '22'],
+                difficulty_level=1,
+                category='Default',
+                college_board_aligned=False,
+            )
 
-        return jsonify({
-            "result": "question",
-            "npc": {**npc.to_public_dict(), "is_gas_holder": True},
-            "question": question.to_public_dict() if question else None,
-            "message": None if question else "No questions available",
-        }), 200
+        db.session.add(question)
+        db.session.flush()  # ensures question.id is available before creating interaction
 
     interaction = PlayerInteraction(
         session_id=session_id,
         npc_id=npc.id,
-        question_id=None,
+        question_id=question.id if question else None,
     )
     try:
         db.session.add(interaction)
@@ -91,7 +106,8 @@ def interact():
         raise
 
     return jsonify({
-        "result": "success",
-        "npc": {**npc.to_public_dict(), "is_gas_holder": False},
-        "message": "NPC interaction successful",
+        "result": "question",
+        "npc": {**npc.to_public_dict(), "is_gas_holder": is_gas_holder},
+        "question": question.to_public_dict() if question else None,
+        "message": None if question else "No questions available",
     }), 200
