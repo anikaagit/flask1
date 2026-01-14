@@ -1,0 +1,934 @@
+{
+    "jinja_attempts": [
+        {
+            "game_id": "Perfect Morning",
+            "total_global_attempts": 52
+        },
+        {
+            "game_id": "Sharp Memory",
+            "total_global_attempts": 52
+        },
+        {
+            "game_id": "Morning Star",
+            "total_global_attempts": 52
+        },
+        {
+            "game_id": "Careful Observer",
+            "total_global_attempts": 52
+        },
+        {
+            "game_id": "Still Sleepy",
+            "total_global_attempts": 52
+        },
+        {
+            "game_id": "Path Finder",
+            "total_global_attempts": 50
+        },
+        {
+            "game_id": "Speed Runner",
+            "total_global_attempts": 50
+        },
+        {
+            "game_id": "Perfect Navigator",
+            "total_global_attempts": 50
+        },
+        {
+            "game_id": "Bug Master",
+            "total_global_attempts": 52
+        },
+        {
+            "game_id": "Quick Reflexes",
+            "total_global_attempts": 52
+        },
+        {
+            "game_id": "Good Shot",
+            "total_global_attempts": 52
+        },
+        {
+            "game_id": "Slow and Steady",
+            "total_global_attempts": 52
+        },
+        {
+            "game_id": "Eagle Eye",
+            "total_global_attempts": 52
+        },
+        {
+            "game_id": "Perfect Scholar",
+            "total_global_attempts": 52
+        },
+        {
+            "game_id": "Social Butterfly",
+            "total_global_attempts": 51
+        },
+        {
+            "game_id": "Perfect Conversationalist",
+            "total_global_attempts": 51
+        },
+        {
+            "game_id": "Friend Magnet",
+            "total_global_attempts": 51
+        },
+        {
+            "game_id": "Awkward Moments",
+            "total_global_attempts": 51
+        },
+        {
+            "game_id": "Learning to Socialize",
+            "total_global_attempts": 51
+        }
+    ],
+    "user_badge_assignments": [
+        {
+            "uid": "t2",
+            "badge_name": "Careful Observer"
+        },
+        {
+            "uid": "t2",
+            "badge_name": "Speed Runner"
+        },
+        {
+            "uid": "t2",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "t2",
+            "badge_name": "Quick Reflexes"
+        },
+        {
+            "uid": "t2",
+            "badge_name": "Bug Master"
+        },
+        {
+            "uid": "t2",
+            "badge_name": "Eagle Eye"
+        },
+        {
+            "uid": "t2",
+            "badge_name": "Good Shot"
+        },
+        {
+            "uid": "t2",
+            "badge_name": "Perfect Conversationalist"
+        },
+        {
+            "uid": "t2",
+            "badge_name": "Friend Magnet"
+        },
+        {
+            "uid": "t2",
+            "badge_name": "Social Butterfly"
+        },
+        {
+            "uid": "t21",
+            "badge_name": "Bug Master"
+        },
+        {
+            "uid": "t21",
+            "badge_name": "Eagle Eye"
+        },
+        {
+            "uid": "t21",
+            "badge_name": "Good Shot"
+        },
+        {
+            "uid": "t21",
+            "badge_name": "Quick Reflexes"
+        },
+        {
+            "uid": "t5",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "t6",
+            "badge_name": "Learning to Socialize"
+        },
+        {
+            "uid": "t6",
+            "badge_name": "Awkward Moments"
+        },
+        {
+            "uid": "t6",
+            "badge_name": "Bug Master"
+        },
+        {
+            "uid": "t6",
+            "badge_name": "Good Shot"
+        },
+        {
+            "uid": "t6",
+            "badge_name": "Eagle Eye"
+        },
+        {
+            "uid": "t6",
+            "badge_name": "Quick Reflexes"
+        },
+        {
+            "uid": "t2",
+            "badge_name": "Perfect Navigator"
+        },
+        {
+            "uid": "t100",
+            "badge_name": "Careful Observer"
+        },
+        {
+            "uid": "t100",
+            "badge_name": "Speed Runner"
+        },
+        {
+            "uid": "t100",
+            "badge_name": "Perfect Navigator"
+        },
+        {
+            "uid": "t100",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "t100",
+            "badge_name": "Perfect Conversationalist"
+        },
+        {
+            "uid": "t100",
+            "badge_name": "Social Butterfly"
+        },
+        {
+            "uid": "t100",
+            "badge_name": "Friend Magnet"
+        },
+        {
+            "uid": "t2",
+            "badge_name": "Morning Star"
+        },
+        {
+            "uid": "mock_user_1616_0",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_1616_0",
+            "badge_name": "Perfect Navigator"
+        },
+        {
+            "uid": "mock_user_1616_0",
+            "badge_name": "Good Shot"
+        },
+        {
+            "uid": "mock_user_1616_0",
+            "badge_name": "Slow and Steady"
+        },
+        {
+            "uid": "mock_user_1616_0",
+            "badge_name": "Eagle Eye"
+        },
+        {
+            "uid": "mock_user_1616_0",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_4634_1",
+            "badge_name": "Perfect Conversationalist"
+        },
+        {
+            "uid": "mock_user_4634_1",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_6181_2",
+            "badge_name": "Good Shot"
+        },
+        {
+            "uid": "mock_user_6181_2",
+            "badge_name": "Learning to Socialize"
+        },
+        {
+            "uid": "mock_user_6181_2",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_2128_3",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_2128_3",
+            "badge_name": "Speed Runner"
+        },
+        {
+            "uid": "mock_user_2128_3",
+            "badge_name": "Eagle Eye"
+        },
+        {
+            "uid": "mock_user_2128_3",
+            "badge_name": "Morning Star"
+        },
+        {
+            "uid": "mock_user_2128_3",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_6278_4",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_6278_4",
+            "badge_name": "Speed Runner"
+        },
+        {
+            "uid": "mock_user_6278_4",
+            "badge_name": "Perfect Navigator"
+        },
+        {
+            "uid": "mock_user_6278_4",
+            "badge_name": "Slow and Steady"
+        },
+        {
+            "uid": "mock_user_6278_4",
+            "badge_name": "Eagle Eye"
+        },
+        {
+            "uid": "mock_user_6278_4",
+            "badge_name": "Social Butterfly"
+        },
+        {
+            "uid": "mock_user_6278_4",
+            "badge_name": "Careful Observer"
+        },
+        {
+            "uid": "mock_user_3863_5",
+            "badge_name": "Perfect Navigator"
+        },
+        {
+            "uid": "mock_user_8923_6",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_8923_6",
+            "badge_name": "Quick Reflexes"
+        },
+        {
+            "uid": "mock_user_8923_6",
+            "badge_name": "Slow and Steady"
+        },
+        {
+            "uid": "mock_user_8923_6",
+            "badge_name": "Friend Magnet"
+        },
+        {
+            "uid": "mock_user_8923_6",
+            "badge_name": "Sharp Memory"
+        },
+        {
+            "uid": "mock_user_8923_6",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_3318_7",
+            "badge_name": "Speed Runner"
+        },
+        {
+            "uid": "mock_user_3318_7",
+            "badge_name": "Bug Master"
+        },
+        {
+            "uid": "mock_user_3318_7",
+            "badge_name": "Good Shot"
+        },
+        {
+            "uid": "mock_user_3318_7",
+            "badge_name": "Careful Observer"
+        },
+        {
+            "uid": "mock_user_7773_8",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_7773_8",
+            "badge_name": "Perfect Navigator"
+        },
+        {
+            "uid": "mock_user_7773_8",
+            "badge_name": "Perfect Conversationalist"
+        },
+        {
+            "uid": "mock_user_7773_8",
+            "badge_name": "Careful Observer"
+        },
+        {
+            "uid": "mock_user_6002_9",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_6002_9",
+            "badge_name": "Speed Runner"
+        },
+        {
+            "uid": "mock_user_6002_9",
+            "badge_name": "Perfect Conversationalist"
+        },
+        {
+            "uid": "mock_user_6002_9",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_3469_10",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_9979_11",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_9979_11",
+            "badge_name": "Slow and Steady"
+        },
+        {
+            "uid": "mock_user_9979_11",
+            "badge_name": "Social Butterfly"
+        },
+        {
+            "uid": "mock_user_9979_11",
+            "badge_name": "Friend Magnet"
+        },
+        {
+            "uid": "mock_user_9979_11",
+            "badge_name": "Awkward Moments"
+        },
+        {
+            "uid": "mock_user_9979_11",
+            "badge_name": "Morning Star"
+        },
+        {
+            "uid": "mock_user_9979_11",
+            "badge_name": "Careful Observer"
+        },
+        {
+            "uid": "mock_user_7700_12",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_7700_12",
+            "badge_name": "Slow and Steady"
+        },
+        {
+            "uid": "mock_user_7700_12",
+            "badge_name": "Eagle Eye"
+        },
+        {
+            "uid": "mock_user_7700_12",
+            "badge_name": "Learning to Socialize"
+        },
+        {
+            "uid": "mock_user_7700_12",
+            "badge_name": "Sharp Memory"
+        },
+        {
+            "uid": "mock_user_6431_14",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_6431_14",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_2377_15",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_4105_16",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_4105_16",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_7239_17",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_7239_17",
+            "badge_name": "Quick Reflexes"
+        },
+        {
+            "uid": "mock_user_7239_17",
+            "badge_name": "Friend Magnet"
+        },
+        {
+            "uid": "mock_user_7239_17",
+            "badge_name": "Careful Observer"
+        },
+        {
+            "uid": "mock_user_2707_18",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_2707_18",
+            "badge_name": "Perfect Navigator"
+        },
+        {
+            "uid": "mock_user_2707_18",
+            "badge_name": "Perfect Conversationalist"
+        },
+        {
+            "uid": "mock_user_2707_18",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_4363_19",
+            "badge_name": "Social Butterfly"
+        },
+        {
+            "uid": "mock_user_4363_19",
+            "badge_name": "Learning to Socialize"
+        },
+        {
+            "uid": "mock_user_4363_19",
+            "badge_name": "Morning Star"
+        },
+        {
+            "uid": "mock_user_5630_20",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_5630_20",
+            "badge_name": "Speed Runner"
+        },
+        {
+            "uid": "mock_user_5630_20",
+            "badge_name": "Perfect Navigator"
+        },
+        {
+            "uid": "mock_user_5630_20",
+            "badge_name": "Good Shot"
+        },
+        {
+            "uid": "mock_user_5630_20",
+            "badge_name": "Social Butterfly"
+        },
+        {
+            "uid": "mock_user_5630_20",
+            "badge_name": "Perfect Conversationalist"
+        },
+        {
+            "uid": "mock_user_7987_21",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_7987_21",
+            "badge_name": "Good Shot"
+        },
+        {
+            "uid": "mock_user_7987_21",
+            "badge_name": "Perfect Conversationalist"
+        },
+        {
+            "uid": "mock_user_7987_21",
+            "badge_name": "Learning to Socialize"
+        },
+        {
+            "uid": "mock_user_7987_21",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_9712_22",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_9712_22",
+            "badge_name": "Good Shot"
+        },
+        {
+            "uid": "mock_user_9712_22",
+            "badge_name": "Eagle Eye"
+        },
+        {
+            "uid": "mock_user_9712_22",
+            "badge_name": "Learning to Socialize"
+        },
+        {
+            "uid": "mock_user_9077_23",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_9077_23",
+            "badge_name": "Speed Runner"
+        },
+        {
+            "uid": "mock_user_9077_23",
+            "badge_name": "Perfect Scholar"
+        },
+        {
+            "uid": "mock_user_9077_23",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_7439_24",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_7439_24",
+            "badge_name": "Good Shot"
+        },
+        {
+            "uid": "mock_user_7439_24",
+            "badge_name": "Slow and Steady"
+        },
+        {
+            "uid": "mock_user_7439_24",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_1017_25",
+            "badge_name": "Speed Runner"
+        },
+        {
+            "uid": "mock_user_1017_25",
+            "badge_name": "Learning to Socialize"
+        },
+        {
+            "uid": "mock_user_1017_25",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_8272_26",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_4494_27",
+            "badge_name": "Speed Runner"
+        },
+        {
+            "uid": "mock_user_4494_27",
+            "badge_name": "Bug Master"
+        },
+        {
+            "uid": "mock_user_4494_27",
+            "badge_name": "Awkward Moments"
+        },
+        {
+            "uid": "mock_user_4494_27",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_8897_28",
+            "badge_name": "Slow and Steady"
+        },
+        {
+            "uid": "mock_user_8897_28",
+            "badge_name": "Eagle Eye"
+        },
+        {
+            "uid": "mock_user_8897_28",
+            "badge_name": "Social Butterfly"
+        },
+        {
+            "uid": "mock_user_8897_28",
+            "badge_name": "Perfect Conversationalist"
+        },
+        {
+            "uid": "mock_user_8897_28",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_1322_29",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_1013_30",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_1013_30",
+            "badge_name": "Perfect Conversationalist"
+        },
+        {
+            "uid": "mock_user_4652_34",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_4652_34",
+            "badge_name": "Eagle Eye"
+        },
+        {
+            "uid": "mock_user_4652_34",
+            "badge_name": "Awkward Moments"
+        },
+        {
+            "uid": "mock_user_4652_34",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_3346_35",
+            "badge_name": "Friend Magnet"
+        },
+        {
+            "uid": "mock_user_3346_35",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_8748_36",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_9820_37",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_9820_37",
+            "badge_name": "Eagle Eye"
+        },
+        {
+            "uid": "mock_user_9820_37",
+            "badge_name": "Perfect Conversationalist"
+        },
+        {
+            "uid": "mock_user_9820_37",
+            "badge_name": "Awkward Moments"
+        },
+        {
+            "uid": "mock_user_9820_37",
+            "badge_name": "Learning to Socialize"
+        },
+        {
+            "uid": "mock_user_9820_37",
+            "badge_name": "Sharp Memory"
+        },
+        {
+            "uid": "mock_user_9820_37",
+            "badge_name": "Morning Star"
+        },
+        {
+            "uid": "mock_user_4071_38",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_4071_38",
+            "badge_name": "Friend Magnet"
+        },
+        {
+            "uid": "mock_user_4071_38",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_6365_39",
+            "badge_name": "Speed Runner"
+        },
+        {
+            "uid": "mock_user_6365_39",
+            "badge_name": "Good Shot"
+        },
+        {
+            "uid": "mock_user_6365_39",
+            "badge_name": "Slow and Steady"
+        },
+        {
+            "uid": "mock_user_6365_39",
+            "badge_name": "Eagle Eye"
+        },
+        {
+            "uid": "mock_user_6365_39",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_3359_40",
+            "badge_name": "Quick Reflexes"
+        },
+        {
+            "uid": "mock_user_3359_40",
+            "badge_name": "Perfect Conversationalist"
+        },
+        {
+            "uid": "mock_user_3359_40",
+            "badge_name": "Awkward Moments"
+        },
+        {
+            "uid": "mock_user_3359_40",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_2433_41",
+            "badge_name": "Slow and Steady"
+        },
+        {
+            "uid": "mock_user_2433_41",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_2433_41",
+            "badge_name": "Careful Observer"
+        },
+        {
+            "uid": "mock_user_7546_42",
+            "badge_name": "Friend Magnet"
+        },
+        {
+            "uid": "mock_user_7546_42",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_4014_43",
+            "badge_name": "Perfect Navigator"
+        },
+        {
+            "uid": "mock_user_4014_43",
+            "badge_name": "Quick Reflexes"
+        },
+        {
+            "uid": "mock_user_4014_43",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_9543_44",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_9543_44",
+            "badge_name": "Perfect Conversationalist"
+        },
+        {
+            "uid": "mock_user_9543_44",
+            "badge_name": "Sharp Memory"
+        },
+        {
+            "uid": "mock_user_9543_44",
+            "badge_name": "Morning Star"
+        },
+        {
+            "uid": "mock_user_9543_44",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_8715_45",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_8715_45",
+            "badge_name": "Quick Reflexes"
+        },
+        {
+            "uid": "mock_user_8715_45",
+            "badge_name": "Learning to Socialize"
+        },
+        {
+            "uid": "mock_user_8715_45",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_4288_46",
+            "badge_name": "Eagle Eye"
+        },
+        {
+            "uid": "mock_user_4288_46",
+            "badge_name": "Learning to Socialize"
+        },
+        {
+            "uid": "mock_user_4288_46",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_2177_47",
+            "badge_name": "Slow and Steady"
+        },
+        {
+            "uid": "mock_user_2177_47",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_7474_48",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_7474_48",
+            "badge_name": "Perfect Conversationalist"
+        },
+        {
+            "uid": "mock_user_7474_48",
+            "badge_name": "Awkward Moments"
+        },
+        {
+            "uid": "mock_user_7474_48",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "mock_user_2965_49",
+            "badge_name": "Path Finder"
+        },
+        {
+            "uid": "mock_user_2965_49",
+            "badge_name": "Slow and Steady"
+        },
+        {
+            "uid": "mock_user_2965_49",
+            "badge_name": "Learning to Socialize"
+        },
+        {
+            "uid": "mock_user_2965_49",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "t67",
+            "badge_name": "Sharp Memory"
+        },
+        {
+            "uid": "t67",
+            "badge_name": "Morning Star"
+        },
+        {
+            "uid": "t67",
+            "badge_name": "Careful Observer"
+        },
+        {
+            "uid": "t67",
+            "badge_name": "Still Sleepy"
+        },
+        {
+            "uid": "t67",
+            "badge_name": "Perfect Scholar"
+        },
+        {
+            "uid": "t67",
+            "badge_name": "Bug Master"
+        },
+        {
+            "uid": "t67",
+            "badge_name": "Quick Reflexes"
+        },
+        {
+            "uid": "t67",
+            "badge_name": "Good Shot"
+        },
+        {
+            "uid": "t67",
+            "badge_name": "Eagle Eye"
+        },
+        {
+            "uid": "t67",
+            "badge_name": "Perfect Conversationalist"
+        },
+        {
+            "uid": "t67",
+            "badge_name": "Social Butterfly"
+        },
+        {
+            "uid": "t67",
+            "badge_name": "Friend Magnet"
+        },
+        {
+            "uid": "t199",
+            "badge_name": "Bug Master"
+        },
+        {
+            "uid": "t199",
+            "badge_name": "Good Shot"
+        },
+        {
+            "uid": "t199",
+            "badge_name": "Perfect Scholar"
+        },
+        {
+            "uid": "t199",
+            "badge_name": "Quick Reflexes"
+        },
+        {
+            "uid": "t199",
+            "badge_name": "Eagle Eye"
+        }
+    ]
+}

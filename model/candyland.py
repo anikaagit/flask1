@@ -1,5 +1,7 @@
 from __init__ import db
 from model.user import User
+import json
+import os
 
 # --- EXISTING CHARACTER MODEL ---
 class CandylandCharacter(db.Model):
@@ -42,15 +44,12 @@ class CandylandBadge(db.Model):
         self.badge_icon = badge_icon
 
 # --- NEW: USER <-> BADGE RELATIONSHIP (Many-to-Many) ---
-# This matches your teacher's "UserSections" pattern
 class CandylandUserBadge(db.Model):
     __tablename__ = 'candyland_user_badges'
     
-    # Composite Primary Key ensures a user cannot have duplicate of same badge
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     badge_id = db.Column(db.Integer, db.ForeignKey('candyland_badges.id'), primary_key=True)
 
-    # Relationships to access data easily
     user = db.relationship("User", backref=db.backref("my_badges", cascade="all, delete-orphan"))
     badge = db.relationship("CandylandBadge", backref=db.backref("owners", cascade="all, delete-orphan"))
 
@@ -65,37 +64,21 @@ def initCandyland():
 import random
 from sqlalchemy import func
 
-# Update this function in candyland.py
 def calculate_badge_rarity(badge_id):
-    """
-    Refined Business Logic: Calculates rarity based on 
-    Attempts (JinjaAdmin) vs Earned (UserBadge).
-    """
     badge = CandylandBadge.query.get(badge_id)
     if not badge:
         return 0
-
-    # 1. Get total attempts from the "Administration Table" (JinjaAdmin)
     stats = CandylandJinjaAdmin.query.filter_by(game_id=badge.badge_name).first()
     total_attempts = stats.total_global_attempts if stats else 0
-    
-    # 2. Get total people who actually won it (Many-to-Many table)
     total_earned = db.session.query(func.count(CandylandUserBadge.user_id)).filter_by(badge_id=badge_id).scalar()
-
     if total_attempts == 0:
-        # Fallback: if no Jinja stats exist yet, use total users so we don't divide by zero
         total_users = db.session.query(func.count(User.id)).scalar()
         if total_users == 0: return 0
         return round((total_earned / total_users) * 100, 1)
-    
     rarity_percentage = (total_earned / total_attempts) * 100
     return round(rarity_percentage, 1)
 
 def inject_mock_data(count=50):
-    """
-    FIXED: Now increments JinjaAdmin attempts along with assigning badges
-    to ensure rarity math stays below 100%.
-    """
     badge_data = [
         ('Path Finder', '📍'), ('Speed Runner', '⚡'), ('Perfect Navigator', '🧭'),
         ('Bug Master', '🐛'), ('Quick Reflexes', '🤺'), ('Good Shot', '🎯'),
@@ -105,8 +88,6 @@ def inject_mock_data(count=50):
         ('Perfect Morning', '🌅'), ('Sharp Memory', '🧠'), ('Morning Star', '⭐'),
         ('Still Sleepy', '😴'), ('Careful Observer', '🧐')
     ]
-
-    # Ensure badges and Admin records exist
     badge_objs = []
     for name, icon in badge_data:
         b = CandylandBadge.query.filter_by(badge_name=name).first()
@@ -114,85 +95,88 @@ def inject_mock_data(count=50):
             b = CandylandBadge(badge_name=name, badge_icon=icon)
             db.session.add(b)
         badge_objs.append(b)
-        
-        # Ensure there is a record in JinjaAdmin for this badge
         admin_rec = CandylandJinjaAdmin.query.filter_by(game_id=name).first()
         if not admin_rec:
             admin_rec = CandylandJinjaAdmin(game_id=name, total_global_attempts=0)
             db.session.add(admin_rec)
     db.session.commit()
-
     for i in range(count):
         fake_uid = f"mock_user_{random.randint(1000, 9999)}_{i}"
         if not User.query.filter_by(_uid=fake_uid).first():
             user = User(name=fake_uid, uid=fake_uid, password="password123")
             db.session.add(user)
             db.session.flush() 
-
             for b in badge_objs:
-                # IMPORTANT: Every mock user represents an "Attempt" 
                 admin_rec = CandylandJinjaAdmin.query.filter_by(game_id=b.badge_name).first()
                 admin_rec.total_global_attempts += 1
-
-                # Probabilities for "Earned"
                 if b.badge_name in ['Bug Master', 'Perfect Scholar', 'Perfect Morning']:
-                    prob = 0.03 # 3% Rare
+                    prob = 0.03
                 elif b.badge_name in ['Path Finder', 'Still Sleepy']:
-                    prob = 0.70 # 70% Common
+                    prob = 0.70
                 else:
-                    prob = 0.15 # 15% Uncommon
-                
+                    prob = 0.15
                 if random.random() < prob:
                     rel = CandylandUserBadge(user_id=user.id, badge_id=b.id)
                     db.session.add(rel)
-    
     db.session.commit()
-    print(f"Injected {count} users. Denominators (JinjaAdmin) and Numerators (UserBadge) are synced.")
 
 def clear_candyland_data():
-    """
-    Cleans up mock users and resets admin stats so you can fix the 1400% error.
-    """
-    # Delete mock users (names starting with mock_user_)
     mock_users = User.query.filter(User._uid.like('mock_user_%')).all()
     for u in mock_users:
-        # Relationships (badges/scores) will cascade delete if your model is set up correctly
         db.session.delete(u)
-    
-    # Reset JinjaAdmin attempts to 0
     db.session.query(CandylandJinjaAdmin).update({CandylandJinjaAdmin.total_global_attempts: 0})
-    
     db.session.commit()
-    print("Mock data cleared and JinjaAdmin reset.")
     
 def setup_candyland_with_data():
-    """
-    Replacement for initCandyland to ensure tables are created 
-    AND mock data is injected.
-    """
     db.create_all()
-    # Only inject if we don't have enough data already
     if db.session.query(func.count(User.id)).scalar() < 20:
         inject_mock_data(100)
 
-# --- NEW: JINJA ADMINISTRATION TABLE (Phase 1) ---
 class CandylandJinjaAdmin(db.Model):
-    """
-    This is the core Administration Table requested by the professor.
-    It tracks global game analytics (Attempts) used to calculate rarity.
-    """
     __tablename__ = 'candyland_jinja_admin'
-    
     id = db.Column(db.Integer, primary_key=True)
-    game_id = db.Column(db.String(100), unique=True, nullable=False) # e.g., 'Path Finder'
+    game_id = db.Column(db.String(100), unique=True, nullable=False)
     total_global_attempts = db.Column(db.Integer, default=0)
-
     def __init__(self, game_id, total_global_attempts=0):
         self.game_id = game_id
         self.total_global_attempts = total_global_attempts
-
     def to_dict(self):
-        return {
-            "game_id": self.game_id,
-            "attempts": self.total_global_attempts
-        }
+        return {"game_id": self.game_id, "attempts": self.total_global_attempts}
+
+# --- PHASE 2: SERIALIZATION LOGIC (BACKUP) ---
+def backup_rarity_data():
+    """
+    Utility function to save the JinjaAdmin and UserBadge state to JSON.
+    Uses 'uid' and 'badge_name' instead of IDs so the data is portable 
+    across database resets.
+    """
+    # 1. Capture Global Attempt Stats (JinjaAdmin)
+    admin_data = []
+    all_stats = CandylandJinjaAdmin.query.all()
+    for s in all_stats:
+        admin_data.append({
+            "game_id": s.game_id,
+            "total_global_attempts": s.total_global_attempts
+        })
+
+    # 2. Capture Many-to-Many Badge Assignments
+    badge_assignments = []
+    all_assignments = CandylandUserBadge.query.all()
+    for a in all_assignments:
+        badge_assignments.append({
+            "uid": a.user._uid,
+            "badge_name": a.badge.badge_name
+        })
+
+    # 3. Build final dictionary
+    snapshot = {
+        "jinja_attempts": admin_data,
+        "user_badge_assignments": badge_assignments
+    }
+
+    # 4. Write to file
+    file_path = os.path.join(os.getcwd(), 'rarity_snapshot.json')
+    with open(file_path, 'w') as f:
+        json.dump(snapshot, f, indent=4)
+    
+    return file_path
